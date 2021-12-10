@@ -11,6 +11,7 @@ const config: webpack.Configuration = {
     path: path.resolve(__dirname, 'dist'),
     filename: 'main.bundle.js',
   },
+  devtool: 'inline-source-map',
   resolve: {
     // Add `.ts` and `.tsx` as a resolvable extension.
     extensions: [".ts", ".tsx", ".js"]

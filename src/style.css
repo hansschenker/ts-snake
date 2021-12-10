@@ -1,3 +1,36 @@
+:root {
+  --snake-left: 250px;
+  --snake-top: 200px;
+  --snake-width: 30px;
+  --tx: 30px;
+  --ty: 30px;
+  --delta-x: 30px;
+  --delta-y: 30px;
+}
+
 h3 {
-    color: green;
+  color: green;
+}
+
+#board {
+  position: relative;
+  height: 600px;
+  min-width: 600px;
+  max-width: 600px;
+  /* margin: 0 auto; */
+  background-color: azure;
+  border: 1px solid;
+}
+
+#snake {
+  
+  position: absolute;
+  left: var(--snake-left);
+  top: var(--snake-top);
+  width: var(--snake-width);
+  height: var(--snake-part);
+  transform: translateX(var(--delta-x));
+  transform: translateY(var(--delta-y));
+  /* transform: translate(var(--delta-x), var(--delta-y), 0); */
+  background-color: aquamarine;
 }

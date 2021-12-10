@@ -1,62 +1,112 @@
-import { interval, map, scan, take, tap } from "rxjs";
-
+import {
+  delay,
+  distinctUntilChanged,
+  merge,
+  mergeMap,
+  of,
+  scan,
+  takeUntil,
+  withLatestFrom,
+} from "rxjs";
 import "./style.css";
+import {
+  combineLatest,
+  fromEvent,
+  filter,
+  interval,
+  map,
+  repeat,
+  switchMap,
+  take,
+  tap,
+} from "rxjs";
+import {
+  Snake,
+  size,
+  range,
+  generateSnake,
+  SnakeState,
+  Position,
+} from "./snake";
 
-type Size = number;
+// type Direction = "x" | "-x" | "y" | "-y";
 
-type Color = "red" | "green";
+// interface Position {
+//   x: number;
+//   y:  number;
+// }
+interface Move {
+  step: string;
+  direction: string;
+}
 
-type Square = { x: number; y: number; size: Size; color: string };
-
-type Snake = Square[];
-
-const range = (min: number, max: number) =>
-  Array.from({ length: max - min + 1 }, (_, i) => min + i);
-
-const renderSnake = (snake: Snake) => {
-  const boardEl = document.getElementById("board"); //
-
-  snake.map((square, i) => {
-    console.log("i:", i);
-
-    const divEl = document.createElement("div");
-    divEl.innerText = "X";
-    divEl.style.position = "absolute";
-    divEl.style.display = "inline-block";
-    divEl.style.left = square.x + "px";
-    divEl.style.top = square.y + "px";
-    divEl.style.width = square.size + "px";
-    divEl.style.height = square.size + "px";
-    divEl.style.backgroundColor = "green";
-    divEl.style.border = "1px solid black";
-    divEl.style.textAlign = "center";
-
-    console.log("divEl:", divEl);
-    boardEl!.appendChild(divEl);
-  });
+type Keys = {
+  [key: number]: string;
 };
 
-const generateSnake = (nbrs: number[]): Snake => {
-  return nbrs.map((n, i) => ({
-    x: n * 40,
-    y: 70,
-    size: 40,
-    color: "green",
-  })); //?
+const keysToDirection: Keys = {
+  37: "-x",
+  39: "x",
+  38: "-y",
+  40: "y",
 };
 
-const snake = generateSnake(range(1, 1));
-console.log("snake:", snake);
+const snakeEl = document.getElementById("snake");
+const root = document.documentElement;
+// root.style.setProperty('--snake-width', "20px")
+// root.style.setProperty('--delta-x', "0px")
+// root.style.setProperty('--delta-y', "0px")
 
-const updateSnake = (x: number) => {
-  snake.forEach((s) => (s.x += 40));
-};
-const ticks$ = interval(1000);
+const left$ = fromEvent<KeyboardEvent>(document, "keydown").pipe(
+  filter((e) => e.keyCode === 37),
+  map((e) => keysToDirection[e.keyCode])
+);
+const right$ = fromEvent<KeyboardEvent>(document, "keydown").pipe(
+  filter((e) => e.keyCode === 39),
+  map((e) => keysToDirection[e.keyCode])
+);
+const up$ = fromEvent<KeyboardEvent>(document, "keydown").pipe(
+  filter((e) => e.keyCode === 38),
+  map((e) => keysToDirection[e.keyCode])
+);
+const down$ = fromEvent<KeyboardEvent>(document, "keydown").pipe(
+  filter((e) => e.keyCode === 40),
+  map((e) => keysToDirection[e.keyCode])
+);
 
-ticks$
+const keys$ = merge(left$, right$, up$, down$)
+const timer$ = interval(1000)
   .pipe(
-    map(n => snake.forEach(s => s.x += 40)),
-    tap(() => renderSnake(snake)),
-    take(4)
+    withLatestFrom(keys$),
+    take(15),
+    map((v) => ({ number: v[0], move: v[1] }))
   )
-  .subscribe();
+  //.subscribe((v) => console.log(v))
+  .subscribe(moveDirection);
+
+
+//@ts-ignore
+function moveDirection({ number, move }) {
+
+  let step = 30;
+  let translate = "";
+  let translateDeltaX = `${number * step}px`;
+  
+  console.log("move:",translateDeltaX);
+
+  if (move === "x") {
+    translate = `translateX(${number * step}px)`;
+  } else if (move === "y") {
+    translate = `translateY(${number * step}px)`;
+  } else if (move === "-x") {
+    translate = `translateX(${-number * step}px)`;
+  } else if (move === "-y") {
+    translate = `translateY(${-number * step}px)`;
+  }
+
+  snakeEl!.style.setProperty("transform", translate);
+}
+
+
+
+
